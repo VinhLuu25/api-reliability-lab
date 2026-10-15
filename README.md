@@ -14,4 +14,32 @@ timeouts, retries, and duplicate operations.
 
 ## Status
 
-Project foundation created. Application implementation has not started.
+The local backend supports health checks and scenario creation,
+listing, and retrieval.
+
+Scenario input is validated at runtime. Scenarios are currently
+stored in memory and are lost when the backend restarts.
+
+Fault execution and PostgreSQL persistence are not implemented yet.
+
+## Run the backend locally
+
+```bash
+cd server
+npm ci
+npm run dev
+```
+
+The API listens at http://127.0.0.1:3001.
+
+## Check and build
+
+```bash
+cd server
+npm run typecheck
+npm run build
+npm start
+```
+
+Stop the development server before starting the compiled server
+on the same port.
