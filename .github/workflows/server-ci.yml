@@ -15,6 +15,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: lab
+          POSTGRES_PASSWORD: local_lab_password
+          POSTGRES_DB: reliability_lab_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lab -d reliability_lab_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+
+    env:
+      DATABASE_URL: postgresql://lab:local_lab_password@127.0.0.1:5432/reliability_lab_test
+
     defaults:
       run:
         working-directory: server
@@ -36,8 +54,14 @@ jobs:
       - name: Check TypeScript
         run: npm run typecheck
 
-      - name: Run tests
+      - name: Run existing tests
         run: npm test
+
+      - name: Migrate test database
+        run: npm run db:migrate
+
+      - name: Run PostgreSQL tests
+        run: npm run test:db
 
       - name: Build server
         run: npm run build
