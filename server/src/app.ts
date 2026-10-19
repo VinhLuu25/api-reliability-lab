@@ -1,12 +1,19 @@
+import { createOrderRouter } from "./orderRouter.js";
+import type { OrderService } from "./orderService.js";
 import express from "express";
 import type { ErrorRequestHandler } from "express";
 import { createScenarioSchema } from "./scenario.js";
 import type { ScenarioService } from "./scenarioService.js";
 
-export function createApp(service: ScenarioService) {
+// Orders lesson: optional dependency preserves existing scenario tests.
+export function createApp(service: ScenarioService, orderService?: OrderService) {
   const app = express();
 
   app.use(express.json({ limit: "16kb" }));
+
+  if (orderService) {
+    app.use("/api/orders", createOrderRouter(orderService));
+  }
 
   app.get("/api/health", (_req, res) => {
     res.json({

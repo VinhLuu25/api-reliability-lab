@@ -10,7 +10,9 @@
     "test": "tsx --test test/*.test.ts",
     "db:migrate": "node --env-file-if-exists=.env --import tsx src/migrate.ts",
     "db:migrate:test": "node --env-file-if-exists=.env.test --import tsx src/migrate.ts",
-    "test:db": "node --env-file-if-exists=.env.test --import tsx --test test/integration/*.test.ts"
+    "test:db": "node --env-file-if-exists=.env.test --import tsx --test test/integration/*.test.ts",
+    "test:orders": "node --env-file-if-exists=.env.test --import tsx --test test/integration/orderReliability.test.ts",
+    "demo:orders": "node --env-file-if-exists=.env scripts/orders-demo.mjs"
   },
   "keywords": [],
   "author": "",

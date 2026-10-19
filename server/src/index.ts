@@ -1,3 +1,5 @@
+import { OrderService } from "./orderService.js";
+import { PostgresOrderRepository } from "./postgresOrderRepository.js";
 import { createServer } from "node:http";
 import { createApp } from "./app.js";
 import { createDatabasePool, requireDatabaseUrl } from "./database.js";
@@ -12,11 +14,14 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 const pool = createDatabasePool(requireDatabaseUrl());
 const repository = new PostgresScenarioRepository(pool);
 const service = new ScenarioService(repository);
-const server = createServer(createApp(service));
+// Orders lesson: wire persistent order storage.
+const orderService = new OrderService(new PostgresOrderRepository(pool));
+const server = createServer(createApp(service, orderService));
 
 try {
   // Fail startup clearly if PostgreSQL is unavailable or not migrated.
   await pool.query("SELECT id FROM scenarios LIMIT 0");
+  await pool.query("SELECT id FROM orders LIMIT 0");
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
     server.listen(port, "127.0.0.1", () => {
