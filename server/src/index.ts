@@ -20,7 +20,7 @@ const server = createServer(createApp(service, orderService));
 
 try {
   // Fail startup clearly if PostgreSQL is unavailable or not migrated.
-  await pool.query("SELECT id FROM scenarios LIMIT 0");
+  await pool.query("SELECT id, execution FROM scenarios LIMIT 0");
   await pool.query("SELECT id FROM orders LIMIT 0");
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);

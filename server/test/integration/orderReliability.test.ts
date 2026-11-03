@@ -12,7 +12,6 @@ import { createOrderRouter } from "../../src/orderRouter.js";
 import type { OrderRouterOptions } from "../../src/orderRouter.js";
 import type { OrderRepository } from "../../src/orderRepository.js";
 import type { Order } from "../../src/order.js";
-import { input } from "zod";
 
 const url = requireDatabaseUrl();
 if (new URL(url).pathname !== "/reliability_lab_test") {
