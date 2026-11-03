@@ -9,6 +9,10 @@ import { PostgresScenarioRepository } from "../../src/postgresScenarioRepository
 import { ScenarioService } from "../../src/scenarioService.js";
 import type { Scenario } from "../../src/scenario.js";
 
+import {
+  createDefaultExecution,
+} from "../../src/scenarioExecution.js";
+
 const databaseUrl = requireDatabaseUrl();
 if (new URL(databaseUrl).pathname !== "/reliability_lab_test") {
   throw new Error("Database tests require the dedicated reliability_lab_test database.");
@@ -63,6 +67,7 @@ test("PostgreSQL rejects an invalid attempt count even without API validation", 
     id: randomUUID(),
     title: "Invalid direct database write",
     attemptTimeoutMs: 1000,
+    execution: createDefaultExecution(),
     maxAttempts: 6,
     createdAt: new Date().toISOString(),
   };
@@ -84,5 +89,44 @@ test("missing scenarios return 404 for UUID and non-UUID paths", async () => {
       .get("/api/scenarios/" + id)
       .expect(404);
     assert.equal(response.body.error.code, "SCENARIO_NOT_FOUND");
+  }
+});
+
+
+test("persists execution configuration through another pool", async (t) => {
+  const service = new ScenarioService(
+    new PostgresScenarioRepository(pool),
+  );
+
+  const created = await service.create({
+    title: "Configured experiment",
+    attemptTimeoutMs: 1000,
+    maxAttempts: 3,
+    execution: {
+      ...createDefaultExecution(),
+      idempotencyMode: "unkeyed",
+      fault: {
+        kind: "drop_response_after_commit",
+        firstAttempts: 1,
+      },
+    },
+  });
+
+  t.after(async () => {
+    await pool.query(
+      "DELETE FROM scenarios WHERE id = $1",
+      [created.id],
+    );
+  });
+
+  const otherPool = createDatabasePool(databaseUrl);
+
+  try {
+    const repository = new PostgresScenarioRepository(otherPool);
+    const found = await repository.findById(created.id);
+
+    assert.deepEqual(found, created);
+  } finally {
+    await otherPool.end();
   }
 });

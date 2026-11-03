@@ -2,6 +2,7 @@ import type { Pool } from "pg";
 import { z } from "zod";
 import type { Scenario } from "./scenario.js";
 import type { ScenarioRepository } from "./scenarioRepository.js";
+import { scenarioExecutionSchema } from "./scenarioExecution.js";
 
 type ScenarioRow = {
   id: string;
@@ -9,10 +10,11 @@ type ScenarioRow = {
   attempt_timeout_ms: number;
   max_attempts: number;
   created_at: Date;
+  execution: unknown;
 };
 
 const columns =
-  "id, title, attempt_timeout_ms, max_attempts, created_at";
+  "id, title, attempt_timeout_ms, max_attempts, created_at, execution";
 const scenarioIdSchema = z.uuid();
 
 function toScenario(row: ScenarioRow): Scenario {
@@ -22,6 +24,7 @@ function toScenario(row: ScenarioRow): Scenario {
     attemptTimeoutMs: row.attempt_timeout_ms,
     maxAttempts: row.max_attempts,
     createdAt: row.created_at.toISOString(),
+    execution: scenarioExecutionSchema.parse(row.execution),
   };
 }
 
@@ -29,14 +32,18 @@ export class PostgresScenarioRepository implements ScenarioRepository {
   constructor(private readonly pool: Pool) {}
 
   async save(scenario: Scenario): Promise<void> {
+    const execution =
+  scenarioExecutionSchema.parse(scenario.execution);
     await this.pool.query(
-      "INSERT INTO scenarios (" + columns + ") VALUES ($1, $2, $3, $4, $5)",
+      "INSERT INTO scenarios (" + columns + ") " +
+      "VALUES ($1, $2, $3, $4, $5, $6::jsonb)",
       [
         scenario.id,
         scenario.title,
         scenario.attemptTimeoutMs,
         scenario.maxAttempts,
         scenario.createdAt,
+        JSON.stringify(execution),
       ],
     );
   }

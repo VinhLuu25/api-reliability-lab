@@ -3,6 +3,7 @@ import type {
   CreateScenarioInput,
   Scenario,
 } from "./scenario.js";
+import { createScenarioSchema } from "./scenario.js";
 import type {
   ScenarioRepository,
 } from "./scenarioRepository.js";
@@ -13,8 +14,9 @@ export class ScenarioService {
   ) {}
 
   async create(input: CreateScenarioInput): Promise<Scenario> {
+    const parsed = createScenarioSchema.parse(input);
     const scenario: Scenario = {
-      ...input,
+      ...parsed,
       id: randomUUID(),
       createdAt: new Date().toISOString(),
     };

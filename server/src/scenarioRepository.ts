@@ -12,7 +12,7 @@ export class InMemoryScenarioRepository
   private readonly scenarios = new Map<string, Scenario>();
 
   async save(scenario: Scenario): Promise<void> {
-    this.scenarios.set(scenario.id, { ...scenario });
+    this.scenarios.set(scenario.id, structuredClone(scenario));
   }
 
   async findAll(): Promise<Scenario[]> {
@@ -24,6 +24,6 @@ export class InMemoryScenarioRepository
   async findById(id: string): Promise<Scenario | undefined> {
     const scenario = this.scenarios.get(id);
 
-    return scenario ? { ...scenario } : undefined;
+    return scenario ? structuredClone(scenario) : undefined;
   }
 }
