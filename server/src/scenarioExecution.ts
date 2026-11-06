@@ -34,23 +34,20 @@ export const scenarioExecutionSchema = z.strictObject({
 
   deadlineMs: z.number().int().min(100).max(60_000),
 
-  retry: z.strictObject({
-    baseDelayMs: z.number().int().min(0).max(5_000),
-    maxDelayMs: z.number().int().min(0).max(5_000),
-  }).refine(
-    (retry) => retry.baseDelayMs <= retry.maxDelayMs,
-    {
+  retry: z
+    .strictObject({
+      baseDelayMs: z.number().int().min(0).max(5_000),
+      maxDelayMs: z.number().int().min(0).max(5_000),
+    })
+    .refine((retry) => retry.baseDelayMs <= retry.maxDelayMs, {
       path: ["maxDelayMs"],
       message: "maxDelayMs must be at least baseDelayMs.",
-    },
-  ),
+    }),
 
   expectedOrderCount: z.number().int().min(0).max(5),
 });
 
-export type ScenarioExecution =
-  z.infer<typeof scenarioExecutionSchema>;
-
+export type ScenarioExecution = z.infer<typeof scenarioExecutionSchema>;
 
 export function createDefaultExecution(): ScenarioExecution {
   return {

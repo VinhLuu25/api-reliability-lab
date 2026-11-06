@@ -31,10 +31,16 @@ export class PostgresOrderRepository implements OrderRepository {
     // NULL keys do not conflict: unkeyed requests deliberately create new rows.
     const inserted = await this.pool.query<OrderRow>(
       "INSERT INTO orders (id, product_code, quantity, created_at, idempotency_key) " +
-      "VALUES ($1, $2, $3, $4, $5) " +
-      "ON CONFLICT (idempotency_key) DO NOTHING RETURNING " + columns,
-      [candidate.id, candidate.productCode, candidate.quantity,
-        candidate.createdAt, key ?? null],
+        "VALUES ($1, $2, $3, $4, $5) " +
+        "ON CONFLICT (idempotency_key) DO NOTHING RETURNING " +
+        columns,
+      [
+        candidate.id,
+        candidate.productCode,
+        candidate.quantity,
+        candidate.createdAt,
+        key ?? null,
+      ],
     );
 
     const newRow = inserted.rows[0];
@@ -56,8 +62,10 @@ export class PostgresOrderRepository implements OrderRepository {
       throw new Error("The winning idempotent order is no longer available.");
     }
 
-    if (row.product_code !== candidate.productCode ||
-        row.quantity !== candidate.quantity) {
+    if (
+      row.product_code !== candidate.productCode ||
+      row.quantity !== candidate.quantity
+    ) {
       throw new IdempotencyConflictError();
     }
     return { order: toOrder(row), replayed: true };
@@ -66,7 +74,8 @@ export class PostgresOrderRepository implements OrderRepository {
   async findById(id: string): Promise<Order | undefined> {
     if (!idSchema.safeParse(id).success) return undefined;
     const result = await this.pool.query<OrderRow>(
-      "SELECT " + columns + " FROM orders WHERE id = $1", [id],
+      "SELECT " + columns + " FROM orders WHERE id = $1",
+      [id],
     );
     const row = result.rows[0];
     return row ? toOrder(row) : undefined;

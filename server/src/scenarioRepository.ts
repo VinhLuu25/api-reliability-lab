@@ -6,9 +6,7 @@ export interface ScenarioRepository {
   findById(id: string): Promise<Scenario | undefined>;
 }
 
-export class InMemoryScenarioRepository
-  implements ScenarioRepository
-{
+export class InMemoryScenarioRepository implements ScenarioRepository {
   private readonly scenarios = new Map<string, Scenario>();
 
   async save(scenario: Scenario): Promise<void> {
@@ -16,9 +14,7 @@ export class InMemoryScenarioRepository
   }
 
   async findAll(): Promise<Scenario[]> {
-    return [...this.scenarios.values()].map(
-      (scenario) => ({ ...scenario }),
-    );
+    return [...this.scenarios.values()].map((scenario) => ({ ...scenario }));
   }
 
   async findById(id: string): Promise<Scenario | undefined> {

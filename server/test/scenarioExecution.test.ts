@@ -4,9 +4,7 @@ import request from "supertest";
 
 import { createApp } from "../src/app.js";
 import { createDefaultExecution } from "../src/scenarioExecution.js";
-import {
-  InMemoryScenarioRepository,
-} from "../src/scenarioRepository.js";
+import { InMemoryScenarioRepository } from "../src/scenarioRepository.js";
 import { ScenarioService } from "../src/scenarioService.js";
 
 function setup() {
@@ -31,18 +29,12 @@ test("legacy input receives complete execution defaults", async () => {
     })
     .expect(201);
 
-  assert.deepEqual(
-    created.body.data.execution,
-    createDefaultExecution(),
-  );
+  assert.deepEqual(created.body.data.execution, createDefaultExecution());
 
-  const found = await request(app)
-    .get(created.headers.location)
-    .expect(200);
+  const found = await request(app).get(created.headers.location).expect(200);
 
   assert.deepEqual(found.body.data, created.body.data);
 });
-
 
 test("rejects a fault affecting more attempts than allowed", async () => {
   const { app, repository } = setup();

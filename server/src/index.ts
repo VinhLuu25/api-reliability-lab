@@ -10,11 +10,12 @@ const port = Number(process.env.PORT ?? 3001);
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new Error("PORT must be an integer between 1 and 65535.");
 }
+// Loopback by default for local development; containers set HOST=0.0.0.0.
+const host = process.env.HOST ?? "127.0.0.1";
 
 const pool = createDatabasePool(requireDatabaseUrl());
 const repository = new PostgresScenarioRepository(pool);
 const service = new ScenarioService(repository);
-// Orders lesson: wire persistent order storage.
 const orderService = new OrderService(new PostgresOrderRepository(pool));
 const server = createServer(createApp(service, orderService));
 
@@ -24,7 +25,7 @@ try {
   await pool.query("SELECT id FROM orders LIMIT 0");
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
-    server.listen(port, "127.0.0.1", () => {
+    server.listen(port, host, () => {
       server.off("error", reject);
       resolve();
     });
@@ -34,7 +35,7 @@ try {
   throw error;
 }
 
-console.log("API listening at http://127.0.0.1:" + port);
+console.log("API listening at http://" + host + ":" + port);
 
 let stopping = false;
 
@@ -48,7 +49,7 @@ async function shutdown() {
 
   try {
     await new Promise<void>((resolve, reject) => {
-      server.close((error) => error ? reject(error) : resolve());
+      server.close((error) => (error ? reject(error) : resolve()));
     });
     await pool.end();
     clearTimeout(deadline);
@@ -58,5 +59,9 @@ async function shutdown() {
   }
 }
 
-process.once("SIGINT", () => { void shutdown(); });
-process.once("SIGTERM", () => { void shutdown(); });
+process.once("SIGINT", () => {
+  void shutdown();
+});
+process.once("SIGTERM", () => {
+  void shutdown();
+});

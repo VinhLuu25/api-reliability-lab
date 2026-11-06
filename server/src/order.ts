@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-export const createOrderSchema = z.object({
-  productCode: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/),
-  quantity: z.number().int().min(1).max(100),
-}).strict();
+export const createOrderSchema = z
+  .object({
+    productCode: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/),
+    quantity: z.number().int().min(1).max(100),
+  })
+  .strict();
 
-export const idempotencyKeySchema = z.string()
-  .regex(/^[A-Za-z0-9_-]{1,128}$/);
+export const idempotencyKeySchema = z.string().regex(/^[A-Za-z0-9_-]{1,128}$/);
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
 
