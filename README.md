@@ -1,15 +1,21 @@
 # API Reliability Lab
 
-An API reliability learning project built with Node.js, Express, TypeScript, and PostgreSQL. It currently stores test scenarios and orders, and demonstrates how an idempotency key makes order creation safe to retry after an uncertain response.
+A fault-injection lab for write APIs. It asks one question: **when a client gets no response, did the operation fail?** Not necessarily. A request can be saved and its response lost, and a blind retry then creates a duplicate.
 
-> **Current scope:** The API and database are available locally. Saved scenarios do not run yet. There is no web interface or public deployment yet; those are planned for the finished project.
+The lab models this with an order API (Node.js, Express, TypeScript, PostgreSQL). A client that retries without an idempotency key can create duplicate orders; with the same key, the server replays the original result.
+
+> **Status: in development.** The API, database and tests run locally. Saved scenarios do not execute yet, and there is no web interface or public deployment. The roadmap below lists what is planned; none of it is a current capability.
+
+## Why this exists
+
+Timeouts, retries and lost responses are the everyday failure modes of distributed systems, and they are easy to get wrong. The goal is to reproduce them on demand, measure what they cost, and show which mechanisms (idempotency keys, bounded retries with backoff and jitter, deadlines) actually contain the damage.
 
 ## What works today
 
 | Area | Available behavior |
 | --- | --- |
 | Health | `GET /api/health` |
-| Scenarios | Create, list, and retrieve saved scenarios in PostgreSQL; validate input |
+| Scenarios | Create, list, and retrieve saved scenarios (including a validated execution configuration) in PostgreSQL |
 | Orders | Create and retrieve PostgreSQL orders |
 | Idempotency | Reuse `Idempotency-Key` to replay the same order, including after a server restart |
 | Verification | Unit/API tests, PostgreSQL integration tests, and a local order demo |
@@ -41,7 +47,7 @@ npm run db:migrate:test
 npm run dev
 ```
 
-The API listens on `http://127.0.0.1:3001`. If the test database already exists, skip its creation. Keep development and test connection strings separate: integration tests write to the test database.
+The API listens on `http://127.0.0.1:3001` (override with `HOST` and `PORT`). If the test database already exists, skip its creation. Keep development and test connection strings separate: integration tests write to the test database.
 
 In another terminal, try an order and then repeat the exact request:
 
@@ -72,6 +78,8 @@ Successful API responses wrap their payload in `data`; errors use `error` with a
 From `server/`, after the test database is migrated:
 
 ```bash
+npm run lint
+npm run format:check
 npm run typecheck
 npm test
 npm run test:db
@@ -80,11 +88,16 @@ npm run build
 
 `npm run test:orders` runs only the order integration tests. Database integration tests start their own application instances; `npm run dev` is not required. To run compiled output, stop the dev server and use `npm start` after building.
 
-## Next milestones
+## Roadmap
 
-1. Store a validated execution configuration with each scenario.
-2. Execute controlled faults and add a bounded retry runner with deadlines and cancellation.
-3. Persist run history and attempt timelines, then provide a usable CLI.
-4. Build a web interface that runs experiments and displays results; deploy the API, database, and site so visitors can try it online.
+1. Run saved scenarios: a retry executor with per-attempt timeouts, an overall deadline, exponential backoff with jitter, and cancellation.
+2. A network-level fault proxy that drops, delays or fails responses after the API has committed, and run history with an attempt timeline.
+3. Stronger idempotency (stored responses, request fingerprints, expiry, in-flight handling) and a transactional outbox with a deduplicating consumer.
+4. Metrics, logs and traces, plus reproducible load benchmarks that compare naive and keyed clients.
+5. A web interface and a public deployment so visitors can run the experiments.
 
 These are planned features, not current API capabilities.
+
+## License
+
+[MIT](LICENSE)
