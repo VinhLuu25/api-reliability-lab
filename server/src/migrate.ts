@@ -13,8 +13,8 @@ try {
     await client.query("SELECT pg_advisory_xact_lock($1)", [741203]);
     await client.query(
       "CREATE TABLE IF NOT EXISTS schema_migrations (" +
-      "name TEXT PRIMARY KEY, checksum TEXT NOT NULL, " +
-      "applied_at TIMESTAMPTZ NOT NULL DEFAULT now())",
+        "name TEXT PRIMARY KEY, checksum TEXT NOT NULL, " +
+        "applied_at TIMESTAMPTZ NOT NULL DEFAULT now())",
     );
 
     const directory = resolve("migrations");
@@ -23,7 +23,9 @@ try {
       .sort();
 
     if (names.length === 0) {
-      throw new Error("No SQL migrations found. Run this command from server/.");
+      throw new Error(
+        "No SQL migrations found. Run this command from server/.",
+      );
     }
 
     for (const name of names) {

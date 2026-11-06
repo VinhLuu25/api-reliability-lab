@@ -1,17 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type {
-  CreateScenarioInput,
-  Scenario,
-} from "./scenario.js";
+import type { CreateScenarioInput, Scenario } from "./scenario.js";
 import { createScenarioSchema } from "./scenario.js";
-import type {
-  ScenarioRepository,
-} from "./scenarioRepository.js";
+import type { ScenarioRepository } from "./scenarioRepository.js";
 
 export class ScenarioService {
-  constructor(
-    private readonly repository: ScenarioRepository,
-  ) {}
+  constructor(private readonly repository: ScenarioRepository) {}
 
   async create(input: CreateScenarioInput): Promise<Scenario> {
     const parsed = createScenarioSchema.parse(input);

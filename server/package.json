@@ -1,7 +1,7 @@
 {
   "name": "api-reliability-lab-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Fault-injection lab for API reliability: timeouts, retries, idempotency keys and lost responses, backed by PostgreSQL.",
   "scripts": {
     "dev": "node --watch --env-file-if-exists=.env --import tsx src/index.ts",
     "typecheck": "tsc --noEmit -p tsconfig.test.json",
@@ -12,11 +12,20 @@
     "db:migrate:test": "node --env-file-if-exists=.env.test --import tsx src/migrate.ts",
     "test:db": "node --env-file-if-exists=.env.test --import tsx --test test/integration/*.test.ts",
     "test:orders": "node --env-file-if-exists=.env.test --import tsx --test test/integration/orderReliability.test.ts",
-    "demo:orders": "node --env-file-if-exists=.env scripts/orders-demo.mjs"
+    "demo:orders": "node --env-file-if-exists=.env scripts/orders-demo.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "reliability",
+    "idempotency",
+    "fault-injection",
+    "distributed-systems",
+    "postgresql"
+  ],
+  "author": "Luu Phuc Vinh",
+  "license": "MIT",
   "type": "module",
   "private": true,
   "dependencies": {
@@ -25,12 +34,24 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/express": "^5.0.6",
     "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
+    "eslint": "^10.14.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.10",
     "supertest": "^7.3.1",
     "tsx": "^4.23.15",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VinhLuu25/api-reliability-lab.git"
   }
 }

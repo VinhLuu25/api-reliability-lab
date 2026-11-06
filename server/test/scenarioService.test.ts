@@ -3,12 +3,8 @@ import { test } from "node:test";
 import { setImmediate } from "node:timers/promises";
 
 import type { CreateScenarioInput } from "../src/scenario.js";
-import {
-  InMemoryScenarioRepository,
-} from "../src/scenarioRepository.js";
-import type {
-  ScenarioRepository,
-} from "../src/scenarioRepository.js";
+import { InMemoryScenarioRepository } from "../src/scenarioRepository.js";
+import type { ScenarioRepository } from "../src/scenarioRepository.js";
 import { ScenarioService } from "../src/scenarioService.js";
 
 const validInput: CreateScenarioInput = {
@@ -27,19 +23,13 @@ test("creates a scenario and makes it available in storage", async () => {
 
   // Assert: check its observable results.
   assert.equal(scenario.title, validInput.title);
-  assert.equal(
-    scenario.attemptTimeoutMs,
-    validInput.attemptTimeoutMs,
-  );
+  assert.equal(scenario.attemptTimeoutMs, validInput.attemptTimeoutMs);
   assert.equal(scenario.maxAttempts, validInput.maxAttempts);
 
   assert.equal(typeof scenario.id, "string");
   assert.notEqual(scenario.id, "");
 
-  assert.equal(
-    Number.isNaN(Date.parse(scenario.createdAt)),
-    false,
-  );
+  assert.equal(Number.isNaN(Date.parse(scenario.createdAt)), false);
 
   const storedScenario = await repository.findById(scenario.id);
 
@@ -63,10 +53,9 @@ test("rejects creation when storage fails", async () => {
 
   const service = new ScenarioService(repository);
 
-  await assert.rejects(
-    () => service.create(validInput),
-    { message: "Storage unavailable" },
-  );
+  await assert.rejects(() => service.create(validInput), {
+    message: "Storage unavailable",
+  });
 });
 
 test("waits for saving to finish before creation succeeds", async () => {
@@ -96,9 +85,5 @@ test("waits for saving to finish before creation succeeds", async () => {
   // Also allow an incorrectly unawaited save to finish.
   await setImmediate();
 
-  assert.deepEqual(events, [
-    "save finished",
-    "create returned",
-  ]);
+  assert.deepEqual(events, ["save finished", "create returned"]);
 });
-

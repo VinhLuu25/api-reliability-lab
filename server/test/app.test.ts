@@ -3,9 +3,7 @@ import { test } from "node:test";
 import request from "supertest";
 
 import { createApp } from "../src/app.js";
-import {
-  InMemoryScenarioRepository,
-} from "../src/scenarioRepository.js";
+import { InMemoryScenarioRepository } from "../src/scenarioRepository.js";
 import { ScenarioService } from "../src/scenarioService.js";
 
 const validInput = {
@@ -41,10 +39,7 @@ test("creates, retrieves, and lists a scenario", async () => {
   assert.equal(typeof scenario.id, "string");
   assert.notEqual(scenario.id, "");
 
-  assert.equal(
-    created.headers.location,
-    `/api/scenarios/${scenario.id}`,
-  );
+  assert.equal(created.headers.location, `/api/scenarios/${scenario.id}`);
 
   const retrieved = await request(app)
     .get(`/api/scenarios/${scenario.id}`)
@@ -52,9 +47,7 @@ test("creates, retrieves, and lists a scenario", async () => {
 
   assert.deepEqual(retrieved.body.data, scenario);
 
-  const listed = await request(app)
-    .get("/api/scenarios")
-    .expect(200);
+  const listed = await request(app).get("/api/scenarios").expect(200);
 
   assert.deepEqual(listed.body.data, [scenario]);
 });
@@ -70,14 +63,9 @@ test("rejects a string maxAttempts without saving anything", async () => {
     })
     .expect(400);
 
-  assert.equal(
-    response.body.error.code,
-    "INVALID_SCENARIO",
-  );
+  assert.equal(response.body.error.code, "INVALID_SCENARIO");
 
-  const listed = await request(app)
-    .get("/api/scenarios")
-    .expect(200);
+  const listed = await request(app).get("/api/scenarios").expect(200);
 
   assert.deepEqual(listed.body.data, []);
 });
@@ -93,10 +81,7 @@ test("rejects maxAttempts above the allowed maximum", async () => {
     })
     .expect(400);
 
-  assert.equal(
-    response.body.error.code,
-    "INVALID_SCENARIO",
-  );
+  assert.equal(response.body.error.code, "INVALID_SCENARIO");
 });
 
 test("rejects a title longer than 120 characters", async () => {
@@ -110,10 +95,7 @@ test("rejects a title longer than 120 characters", async () => {
     })
     .expect(400);
 
-  assert.equal(
-    response.body.error.code,
-    "INVALID_SCENARIO",
-  );
+  assert.equal(response.body.error.code, "INVALID_SCENARIO");
 });
 
 test("returns INVALID_JSON for malformed JSON", async () => {
@@ -125,10 +107,7 @@ test("returns INVALID_JSON for malformed JSON", async () => {
     .send('{"title":')
     .expect(400);
 
-  assert.equal(
-    response.body.error.code,
-    "INVALID_JSON",
-  );
+  assert.equal(response.body.error.code, "INVALID_JSON");
 });
 
 test("returns 404 when the scenario does not exist", async () => {
@@ -138,10 +117,7 @@ test("returns 404 when the scenario does not exist", async () => {
     .get("/api/scenarios/missing-scenario")
     .expect(404);
 
-  assert.equal(
-    response.body.error.code,
-    "SCENARIO_NOT_FOUND",
-  );
+  assert.equal(response.body.error.code, "SCENARIO_NOT_FOUND");
 });
 
 test("accepts a title of exactly 120 characters", async () => {

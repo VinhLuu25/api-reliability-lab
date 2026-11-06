@@ -5,8 +5,11 @@ import type { ErrorRequestHandler } from "express";
 import { createScenarioSchema } from "./scenario.js";
 import type { ScenarioService } from "./scenarioService.js";
 
-// Orders lesson: optional dependency preserves existing scenario tests.
-export function createApp(service: ScenarioService, orderService?: OrderService) {
+// The order service is optional so scenario-only tests can build the app without it.
+export function createApp(
+  service: ScenarioService,
+  orderService?: OrderService,
+) {
   const app = express();
 
   app.use(express.json({ limit: "16kb" }));
@@ -89,9 +92,7 @@ export function createApp(service: ScenarioService, orderService?: OrderService)
     }
 
     const errorType =
-      typeof error === "object" &&
-      error !== null &&
-      "type" in error
+      typeof error === "object" && error !== null && "type" in error
         ? error.type
         : undefined;
 

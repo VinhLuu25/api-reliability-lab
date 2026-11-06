@@ -32,11 +32,12 @@ export class PostgresScenarioRepository implements ScenarioRepository {
   constructor(private readonly pool: Pool) {}
 
   async save(scenario: Scenario): Promise<void> {
-    const execution =
-  scenarioExecutionSchema.parse(scenario.execution);
+    const execution = scenarioExecutionSchema.parse(scenario.execution);
     await this.pool.query(
-      "INSERT INTO scenarios (" + columns + ") " +
-      "VALUES ($1, $2, $3, $4, $5, $6::jsonb)",
+      "INSERT INTO scenarios (" +
+        columns +
+        ") " +
+        "VALUES ($1, $2, $3, $4, $5, $6::jsonb)",
       [
         scenario.id,
         scenario.title,

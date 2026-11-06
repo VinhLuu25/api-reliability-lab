@@ -9,17 +9,19 @@ import { PostgresScenarioRepository } from "../../src/postgresScenarioRepository
 import { ScenarioService } from "../../src/scenarioService.js";
 import type { Scenario } from "../../src/scenario.js";
 
-import {
-  createDefaultExecution,
-} from "../../src/scenarioExecution.js";
+import { createDefaultExecution } from "../../src/scenarioExecution.js";
 
 const databaseUrl = requireDatabaseUrl();
 if (new URL(databaseUrl).pathname !== "/reliability_lab_test") {
-  throw new Error("Database tests require the dedicated reliability_lab_test database.");
+  throw new Error(
+    "Database tests require the dedicated reliability_lab_test database.",
+  );
 }
 
 const pool = createDatabasePool(databaseUrl);
-after(async () => { await pool.end(); });
+after(async () => {
+  await pool.end();
+});
 
 test("persists a scenario for a newly constructed API using another pool", async (t) => {
   const repository = new PostgresScenarioRepository(pool);
@@ -55,7 +57,10 @@ test("persists a scenario for a newly constructed API using another pool", async
 
     assert.deepEqual(retrieved.body.data, scenario);
     const listed = await secondRepository.findAll();
-    assert.deepEqual(listed.find((item) => item.id === scenario.id), scenario);
+    assert.deepEqual(
+      listed.find((item) => item.id === scenario.id),
+      scenario,
+    );
   } finally {
     await secondPool.end();
   }
@@ -92,11 +97,8 @@ test("missing scenarios return 404 for UUID and non-UUID paths", async () => {
   }
 });
 
-
 test("persists execution configuration through another pool", async (t) => {
-  const service = new ScenarioService(
-    new PostgresScenarioRepository(pool),
-  );
+  const service = new ScenarioService(new PostgresScenarioRepository(pool));
 
   const created = await service.create({
     title: "Configured experiment",
@@ -113,10 +115,7 @@ test("persists execution configuration through another pool", async (t) => {
   });
 
   t.after(async () => {
-    await pool.query(
-      "DELETE FROM scenarios WHERE id = $1",
-      [created.id],
-    );
+    await pool.query("DELETE FROM scenarios WHERE id = $1", [created.id]);
   });
 
   const otherPool = createDatabasePool(databaseUrl);
